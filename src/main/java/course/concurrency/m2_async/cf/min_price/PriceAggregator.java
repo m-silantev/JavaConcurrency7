@@ -18,7 +18,8 @@ public class PriceAggregator {
     }
 
     public double getMinPrice(long itemId) {
-        // здесь будет ваш код
-        return 0;
+        return shopIds.stream().parallel()
+                .mapToDouble(shopId -> priceRetriever.getPrice(itemId, shopId))
+                .min().orElse(Double.NaN);
     }
 }
