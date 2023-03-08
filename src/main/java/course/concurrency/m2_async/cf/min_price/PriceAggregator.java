@@ -2,24 +2,33 @@ package course.concurrency.m2_async.cf.min_price;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class PriceAggregator {
 
+    private final double naN = Double.NaN;
     private PriceRetriever priceRetriever = new PriceRetriever();
+    private Collection<Long> shopIds = Set.of(10L, 45L, 66L, 345L, 234L, 333L, 67L, 123L, 768L);
+
 
     public void setPriceRetriever(PriceRetriever priceRetriever) {
         this.priceRetriever = priceRetriever;
     }
-
-    private Collection<Long> shopIds = Set.of(10l, 45l, 66l, 345l, 234l, 333l, 67l, 123l, 768l);
 
     public void setShops(Collection<Long> shopIds) {
         this.shopIds = shopIds;
     }
 
     public double getMinPrice(long itemId) {
-        return shopIds.stream().parallel()
-                .mapToDouble(shopId -> priceRetriever.getPrice(itemId, shopId))
-                .min().orElse(Double.NaN);
+        var completableFutures = shopIds.stream()
+                .map(shopId -> CompletableFuture.supplyAsync(() -> priceRetriever.getPrice(itemId, shopId))
+                        .completeOnTimeout(naN, 2, TimeUnit.SECONDS)
+                        .handle((price, ex) -> ex == null ? price : naN))
+                .toList();
+        return completableFutures.stream()
+                .mapToDouble(CompletableFuture::join)
+                .filter(d -> !Double.isNaN(d))
+                .min().orElse(naN);
     }
 }
