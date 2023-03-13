@@ -11,10 +11,12 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot:3.0.4',
-            'org.springframework.boot:spring-boot-autoconfigure:3.0.4'
+            'org.springframework.boot:spring-boot-autoconfigure:3.0.4',
+            'org.openjdk.jmh:jmh-core:1.36'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1',
             'org.mockito:mockito-core:5.1.1'
+
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 }
 
